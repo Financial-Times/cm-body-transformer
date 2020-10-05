@@ -2,6 +2,7 @@ package bodytransformer
 
 import (
 	"fmt"
+	"html"
 	"regexp"
 
 	"github.com/beevik/etree"
@@ -84,6 +85,9 @@ func TransformBody(body string) (string, error) {
 
 	// Apply specific rules to some combinations of tags
 	strBody = transformParagraphElements(strBody)
+
+	// Remove the html escape sequences, if client of the library needs html escaping, this should be their responsibility
+	strBody = html.UnescapeString(strBody)
 
 	// Remove empty lines from the output
 	strBody = removeEmptyLines(strBody)

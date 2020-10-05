@@ -34,10 +34,12 @@ func TestMain(m *testing.M) {
 // E.g. "72eebb8e-0bf0-11e8-8eb7-42f857ea9f09", "83ad52a8-59a5-11e7-9bc8-8055f264aa8b", "6cf68edc-f686-11e9-9ef3-eca8fc8f2d65"
 // "5dc60b96-669c-11ea-800d-da70cff6e4d3", "f1dcb508-3bc7-11e7-ac89-b01cc67cfeec"
 //
-// - if the body of a content contains ' or " character the current implementation html-escapes them as it is as opposed to
-// the output of the public content API where the characters are not transformed; we are not un-escaping them as there is
-// content that contains html escaped sequences like &amp; that we don't want to unescape
-// E.g. "c7108d38-929e-11da-977b-0000779e2340", "aabd25b0-0be7-11e6-b0f1-61f222853ff3"
+// - if the body of a content contains html escape sequences the current implementation html-unescapes them as opposed to
+// the output of the public content API where only some characters are escaped; we are un-escaping them because if the user
+// of the library needs to escape all characters consistently, they will end up escaping the already escaped characters
+// them 2 times and would have invalid character sequence as a result
+// E.g. "2617b220-1d2b-430c-842d-ebcc5be7e169", "d28aa2c6-a598-11db-a4e0-0000779e2340", "261cd90e-b620-11df-a784-00144feabdc0"
+// "144e1502-3762-11e6-a780-b48ed7b6126f", "28d2f611-2e19-4c7a-8e19-06228f567cb8", "34905308-81a4-11e0-8a54-00144feabdc0"
 func TestBodyTransformation(t *testing.T) {
 	httpClient := &http.Client{
 		Timeout: time.Second * 10,
@@ -45,12 +47,11 @@ func TestBodyTransformation(t *testing.T) {
 
 	// set of uuids from random time periods
 	testUUIDs := []string{
-		"2617b220-1d2b-430c-842d-ebcc5be7e169",
-		"d28aa2c6-a598-11db-a4e0-0000779e2340",
+		"aabd25b0-0be7-11e6-b0f1-61f222853ff3",
+		"c7108d38-929e-11da-977b-0000779e2340",
 		"389ebb32-3824-11dd-aabb-0000779fd2ac",
 		"937f7f84-5a2e-11dc-9bcd-0000779fd2ac",
 		"ccf1e97a-f2a3-11db-a454-000b5df10621",
-		"d28aa2c6-a598-11db-a4e0-0000779e2340",
 		"5a069168-55e8-11e3-96f5-00144feabdc0",
 		"e7e41134-e6d4-11db-9034-000b5df10621",
 		"cdbbe2ea-acc0-11e4-beeb-00144feab7de",
@@ -60,8 +61,6 @@ func TestBodyTransformation(t *testing.T) {
 		"2a4fff9a-b0a2-11dd-8915-0000779fd18c",
 		"2448256e-5a6c-11e2-a02e-00144feab49a",
 		"3bc0a8de-25c8-11dd-b510-000077b07658",
-		"144e1502-3762-11e6-a780-b48ed7b6126f",
-		"28d2f611-2e19-4c7a-8e19-06228f567cb8",
 		"7460443e-b4f1-11e7-8007-554f9eaa90ba",
 		"d03898c2-19b3-11e1-ba5d-00144feabdc0",
 		"6a61d458-e7c7-11e2-babb-00144feabdc0",
@@ -70,16 +69,11 @@ func TestBodyTransformation(t *testing.T) {
 		"6ca69342-4d2b-11e8-97e4-13afc22d86d4",
 		"59c0ed22-7e52-11e5-a1fe-567b37f80b64",
 		"fd38117c-1fcf-11e7-a454-ab04428977f9",
-		"34905308-81a4-11e0-8a54-00144feabdc0",
 		"fa27388e-523f-11e3-8c42-00144feabdc0",
 		"09c4e090-3865-11e0-959c-00144feabdc0",
-		"261cd90e-b620-11df-a784-00144feabdc0",
 		"69612f36-755c-11e8-aa31-31da4279a601",
 		"b93be716-c981-11de-a071-00144feabdc0",
-		"261cd90e-b620-11df-a784-00144feabdc0",
 		"1d7abc10-409e-11de-8f18-00144feabdc0",
-		"a2901ce8-5eb7-4633-b89c-cbdf5b386938",
-		"f4cca7a6-3a7c-4cbb-a7dd-0ffa40abf6a9",
 		"9dffdb8f-f00e-4305-a69a-158b845f6970",
 	}
 
