@@ -6,17 +6,6 @@ import (
 	"strings"
 )
 
-var (
-	nbspRegex                = regexp.MustCompile(`&nbsp;`)
-	pullTagRegex             = regexp.MustCompile(`(?s)<pull-quote.*?</pull-quote>`)
-	webPullTagRegex          = regexp.MustCompile(`(?s)<web-pull-quote.*?</web-pull-quote>`)
-	tableTagRegex            = regexp.MustCompile(`(?s)<table.*?</table>`)
-	promoBoxTagRegex         = regexp.MustCompile(`(?s)<promo-box.*?</promo-box>`)
-	webInlinePictureTagRegex = regexp.MustCompile(`(?s)<web-inline-picture.*?</web-inline-picture>`)
-	tagRegex                 = regexp.MustCompile(`<[^>]*>`)
-	duplicateWhiteSpaceRegex = regexp.MustCompile(`\s+`)
-)
-
 type TextTransformer func(string) string
 
 func TransformText(text string, transformers ...TextTransformer) string {
@@ -53,33 +42,32 @@ func DedupSpaces(src string) string {
 }
 
 func PullTagTransformer(input string) string {
-	return pullTagRegex.ReplaceAllString(input, "")
+	return DeleteMatchedText(`(?s)<pull-quote.*?</pull-quote>`, input)
 }
 
 func WebPullTagTransformer(input string) string {
-	return webPullTagRegex.ReplaceAllString(input, "")
+	return DeleteMatchedText(`(?s)<web-pull-quote.*?</web-pull-quote>`, input)
 }
 
 func TableTagTransformer(input string) string {
-	return tableTagRegex.ReplaceAllString(input, "")
+	return DeleteMatchedText(`(?s)<table.*?</table>`, input)
 }
 
 func PromoBoxTagTransformer(input string) string {
-	return promoBoxTagRegex.ReplaceAllString(input, "")
+	return DeleteMatchedText(`(?s)<promo-box.*?</promo-box>`, input)
 }
 
 func WebInlinePictureTagTransformer(input string) string {
-	return webInlinePictureTagRegex.ReplaceAllString(input, "")
+	return DeleteMatchedText(`(?s)<web-inline-picture.*?</web-inline-picture>`, input)
 }
 
 func HtmlEntityTransformer(input string) string {
-	text := nbspRegex.ReplaceAllString(input, " ")
+	text := RemoveMatchedText(`&nbsp;`, input)
 	return html.UnescapeString(text)
 }
 
 func TagsRemover(input string) string {
-	result := tagRegex.ReplaceAllString(input, " ")
-	return OuterSpaceTrimmer(DuplicateWhiteSpaceRemover(result))
+	return RemoveMatchedText(`<[^>]*>`, input)
 }
 
 func OuterSpaceTrimmer(input string) string {
@@ -87,6 +75,7 @@ func OuterSpaceTrimmer(input string) string {
 }
 
 func DuplicateWhiteSpaceRemover(input string) string {
+	duplicateWhiteSpaceRegex := regexp.MustCompile(`\s+`)
 	return duplicateWhiteSpaceRegex.ReplaceAllString(input, " ")
 }
 
