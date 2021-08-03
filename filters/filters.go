@@ -27,6 +27,31 @@ func TransformText(text string, transformers ...TextTransformer) string {
 	return current
 }
 
+// ReplaceMatchedText replaces every substring in the src string that matches the provided regex with the provided repl
+func ReplaceMatchedText(regex, src, repl string) string {
+	r := regexp.MustCompile(regex)
+	return r.ReplaceAllString(src, repl)
+}
+
+// RemoveMatchedText it substitutes every substring in src that matches provided regexpr with a whitespace.
+// This is to avoid megring words.
+// In the process it deduplicates all whitespaces. See DedupSpaces for more info.
+func RemoveMatchedText(regex, src string) string {
+	result := ReplaceMatchedText(regex, src, " ")
+	return strings.TrimSpace(DedupSpaces(result))
+}
+
+// DeleteMatchedText removes every substring in src that matches a regexpr
+// This filter can merge words together. To avoid that use RemoveMatchedText.
+func DeleteMatchedText(regex, src string) string {
+	return ReplaceMatchedText(regex, src, "")
+}
+
+// DedupSpaces squashes long chains of whitespaces to a single whitespace (the last one in the chain).
+func DedupSpaces(src string) string {
+	return ReplaceMatchedText(`(\s)+`, src, "$1")
+}
+
 func PullTagTransformer(input string) string {
 	return pullTagRegex.ReplaceAllString(input, "")
 }
