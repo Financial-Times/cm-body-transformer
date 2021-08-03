@@ -2,6 +2,7 @@ package filters
 
 import (
 	"fmt"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -21,17 +22,17 @@ func TestTextTransform(t *testing.T) {
 <p>“Curabitur fermentum, dolor vel interdum varius, tellus justo dapibus velit, interdum sollicitudin dolor nibh varius velit.”</p>
 </body>`
 
-	transformedText := TransformText(inputText,
-		PullTagTransformer,
-		WebPullTagTransformer,
-		TableTagTransformer,
-		PromoBoxTagTransformer,
-		WebInlinePictureTagTransformer,
-		HtmlEntityTransformer,
-		TagsRemover,
-		OuterSpaceTrimmer,
-		DuplicateWhiteSpaceRemover,
-		DefaultValueTransformer)
+	transformedText := Apply(inputText,
+		RemovePullQuoteTag,
+		RemoveWebPullQuoteTag,
+		RemoveTableTag,
+		RemovePromoBoxTag,
+		RemoveWebInlinePictureTag,
+		RemoveHTMLEntity,
+		RemoveGenericTags,
+		strings.TrimSpace,
+		DedupSpaces,
+	)
 
 	expectedText := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque, nunc vel consectetur sagittis, " +
 		"purus ex ultrices metus, in consectetur nisl lacus congue nulla. Integer fermentum molestie dui at accumsan. Nam scelerisque luctus tristique. " +
@@ -60,17 +61,17 @@ func TestBlogTransform(t *testing.T) {
 <p><em>Donec id faucibus erat </em></p>
 </body>`
 
-	transformedText := TransformText(inputText,
-		PullTagTransformer,
-		WebPullTagTransformer,
-		TableTagTransformer,
-		PromoBoxTagTransformer,
-		WebInlinePictureTagTransformer,
-		HtmlEntityTransformer,
-		TagsRemover,
-		OuterSpaceTrimmer,
-		DuplicateWhiteSpaceRemover,
-		DefaultValueTransformer)
+	transformedText := Apply(inputText,
+		RemovePullQuoteTag,
+		RemoveWebPullQuoteTag,
+		RemoveTableTag,
+		RemovePromoBoxTag,
+		RemoveWebInlinePictureTag,
+		RemoveHTMLEntity,
+		RemoveGenericTags,
+		strings.TrimSpace,
+		DedupSpaces,
+	)
 
 	expectedText := "Aliquam sagittis ipsum non tortor placerat scelerisque. Maecenas lobortis purus ut cursus tempor. " +
 		"Vestibulum lacus neque, auctor et euismod in, ultricies dictum sem. Fusce finibus erat quis ipsum pharetra, " +
@@ -83,48 +84,40 @@ func TestBlogTransform(t *testing.T) {
 }
 
 func TestPullTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", PullTagTransformer("this is a test<pull-quote>pull quote</pull-quote> followed by another test<pull-quote>\npull quote\n</pull-quote>"), "Pull tags not transformed properly")
+	assert.Equal(t, "this is a test followed by another test", RemovePullQuoteTag("this is a test<pull-quote>pull quote</pull-quote> followed by another test<pull-quote>\npull quote\n</pull-quote>"), "Pull tags not transformed properly")
 }
 
 func TestWebPullTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", WebPullTagTransformer("this is a test<web-pull-quote>web-pull quote</web-pull-quote> followed by another test<web-pull-quote>\nweb-pull quote\n</web-pull-quote>"), "Web-pull tags not transformed properly")
+	assert.Equal(t, "this is a test followed by another test", RemoveWebPullQuoteTag("this is a test<web-pull-quote>web-pull quote</web-pull-quote> followed by another test<web-pull-quote>\nweb-pull quote\n</web-pull-quote>"), "Web-pull tags not transformed properly")
 }
 
 func TestTableTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", TableTagTransformer("this is a test<table style=\"width:100%\">\n	<tr><th>Firstname</th><th>Lastname</th><th>Age</th></tr>\n<tr>	<td>Jill</td><td>Smith</td>	<td>50</td>	</tr>\n	<tr><td>Eve</td><td>Jackson</td>	<td>94</td></tr>\t	</table> followed by another test<table>\nempty table\n</table>"), "Table tags not transformed properly")
+	assert.Equal(t, "this is a test followed by another test", RemoveTableTag("this is a test<table style=\"width:100%\">\n	<tr><th>Firstname</th><th>Lastname</th><th>Age</th></tr>\n<tr>	<td>Jill</td><td>Smith</td>	<td>50</td>	</tr>\n	<tr><td>Eve</td><td>Jackson</td>	<td>94</td></tr>\t	</table> followed by another test<table>\nempty table\n</table>"), "Table tags not transformed properly")
 }
 
 func TestPromoBoxTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", PromoBoxTagTransformer("this is a test<promo-box>promo-box stuff</promo-box> followed by another test<promo-box>\npromo-box stuff\n</promo-box>"), "Promobox tags not transformed properly")
+	assert.Equal(t, "this is a test followed by another test", RemovePromoBoxTag("this is a test<promo-box>promo-box stuff</promo-box> followed by another test<promo-box>\npromo-box stuff\n</promo-box>"), "Promobox tags not transformed properly")
 }
 
 func TestWebInlinePictureTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", WebInlinePictureTagTransformer("this is a test<web-inline-picture>web-inline-picture stuff</web-inline-picture> followed by another test<web-inline-picture>\nweb-inline-picture stuff\n</web-inline-picture>"), "web-inline-picture tags not transformed properly")
+	assert.Equal(t, "this is a test followed by another test", RemoveWebInlinePictureTag("this is a test<web-inline-picture>web-inline-picture stuff</web-inline-picture> followed by another test<web-inline-picture>\nweb-inline-picture stuff\n</web-inline-picture>"), "web-inline-picture tags not transformed properly")
 }
 
 func TestHtmlEntityTransformer(t *testing.T) {
-	assert.Equal(t, "test ‑£& >&", HtmlEntityTransformer("test &#8209;&pound;&amp;&nbsp;&gt;&"), "Entities not transformed properly")
+	assert.Equal(t, "test ‑£& >&", RemoveHTMLEntity("test &#8209;&pound;&amp;&nbsp;&gt;&"), "Entities not transformed properly")
 }
 
 func TestTagsRemover(t *testing.T) {
-	assert.Equal(t, "this is a simple test for tag removal", TagsRemover("this is a <b>simple </b>test<br> for <span attr=\"val\">tag </span>removal"), "Tags not transformed properly")
+	assert.Equal(t, "this is a simple test for tag removal", RemoveGenericTags("this is a <b>simple </b>test<br> for <span attr=\"val\">tag </span>removal"), "Tags not transformed properly")
 }
 
-func TestOuterSpaceTrimmer(t *testing.T) {
-	assert.Equal(t, "just the  goods", OuterSpaceTrimmer("\n  just the  goods   \t"), "Space not trimmed properly")
-}
-
-func TestDuplicateWhiteSpaceRemover(t *testing.T) {
-	assert.Equal(t, " lots of space but no room", DuplicateWhiteSpaceRemover(" lots  of\t\tspace\r\nbut \t\nno room"), "Whitespace not transformed properly")
-}
-
-func TestDefaultValueBlankTransformer(t *testing.T) {
-	assert.Equal(t, ".", DefaultValueTransformer(""), "Empty string not transformed properly")
+func TestDedupSpaces(t *testing.T) {
+	assert.Equal(t, " lots of\tspace\nbut\nno room", DedupSpaces(" lots  of\t\tspace\r\nbut \t\nno room"), "Whitespace not transformed properly")
 }
 
 func TestTagsRemover2(t *testing.T) {
 	input := `<experimental><div data-layout-name=\"card\" class=\"n-content-layout\" data-layout-width=\"fullWidth\"><div class=\"n-content-layout__container\"><h3>Recommended newsletters for you</h3><div class=\"n-content-layout__slot\" data-slot-width=\"true\"><p><strong>#fintechFT</strong> — The biggest themes in the digital disruption of financial services. Sign up <a href=\"https://ep.ft.com/newsletters/subscribe?newsletterIds=575981ede74eb90300a44d8e\">here</a></p><p><strong>Martin Sandbu’s Free Lunch</strong> — Your guide to the global economic policy debate. Sign up <a href=\"https://ep.ft.com/newsletters/subscribe?newsletterIds=56388465e4b0c3d64132e189\">here</a></p></div></div></div></experimental>`
 	expected := `Recommended newsletters for you #fintechFT — The biggest themes in the digital disruption of financial services. Sign up here Martin Sandbu’s Free Lunch — Your guide to the global economic policy debate. Sign up here`
-	result := TagsRemover(input)
+	result := RemoveGenericTags(input)
 	assert.Equal(t, expected, result)
 }

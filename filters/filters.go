@@ -6,9 +6,9 @@ import (
 	"strings"
 )
 
-type TextTransformer func(string) string
+type Filter func(string) string
 
-func TransformText(text string, transformers ...TextTransformer) string {
+func Apply(text string, transformers ...Filter) string {
 	current := text
 	for _, transformer := range transformers {
 		current = transformer(current)
@@ -41,47 +41,31 @@ func DedupSpaces(src string) string {
 	return ReplaceMatchedText(`(\s)+`, src, "$1")
 }
 
-func PullTagTransformer(input string) string {
+func RemovePullQuoteTag(input string) string {
 	return DeleteMatchedText(`(?s)<pull-quote.*?</pull-quote>`, input)
 }
 
-func WebPullTagTransformer(input string) string {
+func RemoveWebPullQuoteTag(input string) string {
 	return DeleteMatchedText(`(?s)<web-pull-quote.*?</web-pull-quote>`, input)
 }
 
-func TableTagTransformer(input string) string {
+func RemoveTableTag(input string) string {
 	return DeleteMatchedText(`(?s)<table.*?</table>`, input)
 }
 
-func PromoBoxTagTransformer(input string) string {
+func RemovePromoBoxTag(input string) string {
 	return DeleteMatchedText(`(?s)<promo-box.*?</promo-box>`, input)
 }
 
-func WebInlinePictureTagTransformer(input string) string {
+func RemoveWebInlinePictureTag(input string) string {
 	return DeleteMatchedText(`(?s)<web-inline-picture.*?</web-inline-picture>`, input)
 }
 
-func HtmlEntityTransformer(input string) string {
+func RemoveHTMLEntity(input string) string {
 	text := RemoveMatchedText(`&nbsp;`, input)
 	return html.UnescapeString(text)
 }
 
-func TagsRemover(input string) string {
+func RemoveGenericTags(input string) string {
 	return RemoveMatchedText(`<[^>]*>`, input)
-}
-
-func OuterSpaceTrimmer(input string) string {
-	return strings.TrimSpace(input)
-}
-
-func DuplicateWhiteSpaceRemover(input string) string {
-	duplicateWhiteSpaceRegex := regexp.MustCompile(`\s+`)
-	return duplicateWhiteSpaceRegex.ReplaceAllString(input, " ")
-}
-
-func DefaultValueTransformer(input string) string {
-	if input == "" {
-		return "."
-	}
-	return input
 }
