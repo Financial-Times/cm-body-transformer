@@ -3,8 +3,6 @@ package filters
 import (
 	"fmt"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
 
 func TestTextTransform(t *testing.T) {
@@ -36,7 +34,7 @@ func TestTextTransform(t *testing.T) {
 		"Praesent viverra non lectus ut ullamcorper. Phasellus porttitor neque at volutpat pulvinar. “Curabitur fermentum, dolor vel interdum varius, " +
 		"tellus justo dapibus velit, interdum sollicitudin dolor nibh varius velit.”"
 
-	assert.Equal(t, expectedText, transformedText, fmt.Sprintf("Expected text %s differs from actual text %s ", transformedText, expectedText))
+	equal(t, expectedText, transformedText, fmt.Sprintf("Expected text %s differs from actual text %s ", transformedText, expectedText))
 }
 
 func TestBlogTransform(t *testing.T) {
@@ -59,44 +57,55 @@ func TestBlogTransform(t *testing.T) {
 		"tellus, pharetra non orci eu, dictum semper enim. Donec vel dapibus mi, vel fermentum sapien. Ut nec nibh ex. " +
 		"Proin dignissim ipsum at lacus condimentum efficitur. Donec at felis felis. Etiam sagittis condimentum maximus. Donec id faucibus erat"
 
-	assert.Equal(t, expectedText, transformedText, fmt.Sprintf("Expected text %s differs from actual text %s ", transformedText, expectedText))
+	equal(t, expectedText, transformedText, fmt.Sprintf("Expected text %s differs from actual text %s ", transformedText, expectedText))
 }
 
 func TestPullTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", RemovePullQuoteTag("this is a test<pull-quote>pull quote</pull-quote> followed by another test<pull-quote>\npull quote\n</pull-quote>"), "Pull tags not transformed properly")
+	equal(t, "this is a test followed by another test", RemovePullQuoteTag("this is a test<pull-quote>pull quote</pull-quote> followed by another test<pull-quote>\npull quote\n</pull-quote>"), "Pull tags not transformed properly")
 }
 
 func TestWebPullTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", RemoveWebPullQuoteTag("this is a test<web-pull-quote>web-pull quote</web-pull-quote> followed by another test<web-pull-quote>\nweb-pull quote\n</web-pull-quote>"), "Web-pull tags not transformed properly")
+	equal(t, "this is a test followed by another test", RemoveWebPullQuoteTag("this is a test<web-pull-quote>web-pull quote</web-pull-quote> followed by another test<web-pull-quote>\nweb-pull quote\n</web-pull-quote>"), "Web-pull tags not transformed properly")
 }
 
 func TestTableTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", RemoveTableTag("this is a test<table style=\"width:100%\">\n	<tr><th>Firstname</th><th>Lastname</th><th>Age</th></tr>\n<tr>	<td>Jill</td><td>Smith</td>	<td>50</td>	</tr>\n	<tr><td>Eve</td><td>Jackson</td>	<td>94</td></tr>\t	</table> followed by another test<table>\nempty table\n</table>"), "Table tags not transformed properly")
+	equal(t, "this is a test followed by another test", RemoveTableTag("this is a test<table style=\"width:100%\">\n	<tr><th>Firstname</th><th>Lastname</th><th>Age</th></tr>\n<tr>	<td>Jill</td><td>Smith</td>	<td>50</td>	</tr>\n	<tr><td>Eve</td><td>Jackson</td>	<td>94</td></tr>\t	</table> followed by another test<table>\nempty table\n</table>"), "Table tags not transformed properly")
 }
 
 func TestPromoBoxTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", RemovePromoBoxTag("this is a test<promo-box>promo-box stuff</promo-box> followed by another test<promo-box>\npromo-box stuff\n</promo-box>"), "Promobox tags not transformed properly")
+	equal(t, "this is a test followed by another test", RemovePromoBoxTag("this is a test<promo-box>promo-box stuff</promo-box> followed by another test<promo-box>\npromo-box stuff\n</promo-box>"), "Promobox tags not transformed properly")
 }
 
 func TestWebInlinePictureTagTransformer(t *testing.T) {
-	assert.Equal(t, "this is a test followed by another test", RemoveWebInlinePictureTag("this is a test<web-inline-picture>web-inline-picture stuff</web-inline-picture> followed by another test<web-inline-picture>\nweb-inline-picture stuff\n</web-inline-picture>"), "web-inline-picture tags not transformed properly")
+	equal(t, "this is a test followed by another test", RemoveWebInlinePictureTag("this is a test<web-inline-picture>web-inline-picture stuff</web-inline-picture> followed by another test<web-inline-picture>\nweb-inline-picture stuff\n</web-inline-picture>"), "web-inline-picture tags not transformed properly")
 }
 
 func TestHtmlEntityTransformer(t *testing.T) {
-	assert.Equal(t, "test ‑£& >&", RemoveHTMLEntity("test &#8209;&pound;&amp;&nbsp;&gt;&"), "Entities not transformed properly")
+	equal(t, "test ‑£& >&", RemoveHTMLEntity("test &#8209;&pound;&amp;&nbsp;&gt;&"), "Entities not transformed properly")
 }
 
 func TestTagsRemover(t *testing.T) {
-	assert.Equal(t, "this is a simple test for tag removal", RemoveGenericTags("this is a <b>simple </b>test<br> for <span attr=\"val\">tag </span>removal"), "Tags not transformed properly")
+	equal(t, "this is a simple test for tag removal", RemoveGenericTags("this is a <b>simple </b>test<br> for <span attr=\"val\">tag </span>removal"), "Tags not transformed properly")
 }
 
 func TestDedupSpaces(t *testing.T) {
-	assert.Equal(t, " lots of\tspace\nbut\nno room", DedupSpaces(" lots  of\t\tspace\r\nbut \t\nno room"), "Whitespace not transformed properly")
+	equal(t, " lots of\tspace\nbut\nno room", DedupSpaces(" lots  of\t\tspace\r\nbut \t\nno room"), "Whitespace not transformed properly")
 }
 
 func TestTagsRemover2(t *testing.T) {
 	input := `<experimental><div data-layout-name=\"card\" class=\"n-content-layout\" data-layout-width=\"fullWidth\"><div class=\"n-content-layout__container\"><h3>Recommended newsletters for you</h3><div class=\"n-content-layout__slot\" data-slot-width=\"true\"><p><strong>#fintechFT</strong> — The biggest themes in the digital disruption of financial services. Sign up <a href=\"https://ep.ft.com/newsletters/subscribe?newsletterIds=575981ede74eb90300a44d8e\">here</a></p><p><strong>Martin Sandbu’s Free Lunch</strong> — Your guide to the global economic policy debate. Sign up <a href=\"https://ep.ft.com/newsletters/subscribe?newsletterIds=56388465e4b0c3d64132e189\">here</a></p></div></div></div></experimental>`
 	expected := `Recommended newsletters for you #fintechFT — The biggest themes in the digital disruption of financial services. Sign up here Martin Sandbu’s Free Lunch — Your guide to the global economic policy debate. Sign up here`
 	result := RemoveGenericTags(input)
-	assert.Equal(t, expected, result)
+	equal(t, expected, result, "")
+}
+
+func equal(t *testing.T, expected, actual string, msg string) {
+	t.Helper()
+	if expected != actual {
+		if msg != "" {
+			t.Fatal(msg)
+		} else {
+			t.Fatalf("missmatch\nexpected: '%s'\nactual: '%s'\n", expected, actual)
+		}
+	}
 }
