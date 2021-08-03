@@ -121,3 +121,10 @@ func TestDuplicateWhiteSpaceRemover(t *testing.T) {
 func TestDefaultValueBlankTransformer(t *testing.T) {
 	assert.Equal(t, ".", DefaultValueTransformer(""), "Empty string not transformed properly")
 }
+
+func TestTagsRemover2(t *testing.T) {
+	input := `<experimental><div data-layout-name=\"card\" class=\"n-content-layout\" data-layout-width=\"fullWidth\"><div class=\"n-content-layout__container\"><h3>Recommended newsletters for you</h3><div class=\"n-content-layout__slot\" data-slot-width=\"true\"><p><strong>#fintechFT</strong> — The biggest themes in the digital disruption of financial services. Sign up <a href=\"https://ep.ft.com/newsletters/subscribe?newsletterIds=575981ede74eb90300a44d8e\">here</a></p><p><strong>Martin Sandbu’s Free Lunch</strong> — Your guide to the global economic policy debate. Sign up <a href=\"https://ep.ft.com/newsletters/subscribe?newsletterIds=56388465e4b0c3d64132e189\">here</a></p></div></div></div></experimental>`
+	expected := `Recommended newsletters for you #fintechFT — The biggest themes in the digital disruption of financial services. Sign up here Martin Sandbu’s Free Lunch — Your guide to the global economic policy debate. Sign up here`
+	result := TagsRemover(input)
+	assert.Equal(t, expected, result)
+}
