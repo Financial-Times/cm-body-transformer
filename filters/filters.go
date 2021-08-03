@@ -16,6 +16,20 @@ func Apply(text string, transformers ...Filter) string {
 	return current
 }
 
+func DefaultContentFilters() []Filter {
+	return []Filter{
+		RemovePullQuoteTag,
+		RemoveWebPullQuoteTag,
+		RemoveTableTag,
+		RemovePromoBoxTag,
+		RemoveWebInlinePictureTag,
+		RemoveHTMLEntity,
+		RemoveGenericTags,
+		strings.TrimSpace,
+		DedupSpaces,
+	}
+}
+
 // ReplaceMatchedText replaces every substring in the src string that matches the provided regex with the provided repl
 func ReplaceMatchedText(regex, src, repl string) string {
 	r := regexp.MustCompile(regex)

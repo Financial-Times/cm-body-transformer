@@ -2,7 +2,6 @@ package filters
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -22,17 +21,7 @@ func TestTextTransform(t *testing.T) {
 <p>“Curabitur fermentum, dolor vel interdum varius, tellus justo dapibus velit, interdum sollicitudin dolor nibh varius velit.”</p>
 </body>`
 
-	transformedText := Apply(inputText,
-		RemovePullQuoteTag,
-		RemoveWebPullQuoteTag,
-		RemoveTableTag,
-		RemovePromoBoxTag,
-		RemoveWebInlinePictureTag,
-		RemoveHTMLEntity,
-		RemoveGenericTags,
-		strings.TrimSpace,
-		DedupSpaces,
-	)
+	transformedText := Apply(inputText, DefaultContentFilters()...)
 
 	expectedText := "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Mauris scelerisque, nunc vel consectetur sagittis, " +
 		"purus ex ultrices metus, in consectetur nisl lacus congue nulla. Integer fermentum molestie dui at accumsan. Nam scelerisque luctus tristique. " +
@@ -61,17 +50,7 @@ func TestBlogTransform(t *testing.T) {
 <p><em>Donec id faucibus erat </em></p>
 </body>`
 
-	transformedText := Apply(inputText,
-		RemovePullQuoteTag,
-		RemoveWebPullQuoteTag,
-		RemoveTableTag,
-		RemovePromoBoxTag,
-		RemoveWebInlinePictureTag,
-		RemoveHTMLEntity,
-		RemoveGenericTags,
-		strings.TrimSpace,
-		DedupSpaces,
-	)
+	transformedText := Apply(inputText, DefaultContentFilters()...)
 
 	expectedText := "Aliquam sagittis ipsum non tortor placerat scelerisque. Maecenas lobortis purus ut cursus tempor. " +
 		"Vestibulum lacus neque, auctor et euismod in, ultricies dictum sem. Fusce finibus erat quis ipsum pharetra, " +
