@@ -53,7 +53,8 @@ func HtmlEntityTransformer(input string) string {
 }
 
 func TagsRemover(input string) string {
-	return tagRegex.ReplaceAllString(input, "")
+	result := tagRegex.ReplaceAllString(input, " ")
+	return OuterSpaceTrimmer(DuplicateWhiteSpaceRemover(result))
 }
 
 func OuterSpaceTrimmer(input string) string {
