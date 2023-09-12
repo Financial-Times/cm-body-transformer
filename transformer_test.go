@@ -16,6 +16,10 @@ func TestTransformBody(t *testing.T) {
 			BodyXMLFixture:  "testdata/10979399-ba25-45b9-b85d-776c1b75bfea/content.html",
 			ExpectedFixture: "testdata/10979399-ba25-45b9-b85d-776c1b75bfea/expected.html",
 		},
+		"scrollable": {
+			BodyXMLFixture:  "testdata/c0ac9d59-2285-4efc-b786-355a10ff3661/content.html",
+			ExpectedFixture: "testdata/c0ac9d59-2285-4efc-b786-355a10ff3661/expected.html",
+		},
 	}
 
 	for name, test := range tests {

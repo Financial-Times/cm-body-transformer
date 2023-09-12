@@ -35,6 +35,8 @@ func TransformBody(body string) (string, error) {
 		transformElementAttributes(el)
 	}
 
+	scrollableTextExtraction(doc)
+
 	// Remove elements with particular tag names -
 	// "pull-quote","promo-box","ft-related","timeline","ft-timeline","table","big-number","img"
 	elementsToStrip := []string{
@@ -147,4 +149,21 @@ func transformParagraphElements(input string) string {
 func removeEmptyLines(input string) string {
 	reLines := regexp.MustCompile(`(?m)^\s*$[\r\n]*|[\r\n]+\s+\z`)
 	return reLines.ReplaceAllString(input, "")
+}
+
+func scrollableTextExtraction(doc *etree.Document) {
+	for _, block := range doc.FindElements("//scrollable-block") {
+		parent := block.Parent()
+		insertIndex := block.Index()
+		texts := block.FindElements(".//scrollable-text")
+		for _, text := range texts {
+			children := text.ChildElements()
+			for childIdx, el := range children {
+				el.RemoveAttr("theme-style")
+				parent.InsertChildAt(insertIndex+childIdx, el)
+			}
+			insertIndex += len(children)
+		}
+		parent.RemoveChild(block)
+	}
 }
