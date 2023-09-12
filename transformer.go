@@ -39,6 +39,7 @@ func TransformBody(body string) (string, error) {
 	// "pull-quote","promo-box","ft-related","timeline","ft-timeline","table","big-number","img"
 	elementsToStrip := []string{
 		"pull-quote", "promo-box", "ft-related", "timeline", "ft-timeline", "table", "big-number", "img",
+		"experimental",
 	}
 	for _, name := range elementsToStrip {
 		for _, el := range doc.FindElements(
