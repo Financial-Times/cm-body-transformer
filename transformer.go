@@ -36,6 +36,7 @@ func TransformBody(body string) (string, error) {
 	}
 
 	scrollableTextExtraction(doc)
+	removeFTContentResources(doc)
 
 	// Remove elements with particular tag names -
 	// "pull-quote","promo-box","ft-related","timeline","ft-timeline","table","big-number","img"
@@ -67,19 +68,6 @@ func TransformBody(body string) (string, error) {
 	for _, el := range doc.FindElements("//a[@data-asset-type='interactive-graphic']") {
 		p := el.Parent()
 		p.RemoveChild(el)
-	}
-
-	// Remove elements with tag ft-content that have attribute "type" with value "http://www.ft.com/ontology/content/ImageSet"
-	for _, t := range doc.FindElements(
-		"//ft-content[@type='http://www.ft.com/ontology/content/ImageSet']") {
-		p := t.Parent()
-		p.RemoveChild(t)
-	}
-
-	// Remove elements with tag ft-content that have attribute "type" with value "http://www.ft.com/ontology/content/MediaResource"
-	for _, t := range doc.FindElements("//ft-content[@type='http://www.ft.com/ontology/content/MediaResource']") {
-		p := t.Parent()
-		p.RemoveChild(t)
 	}
 
 	strBody, err := doc.WriteToString()
@@ -128,6 +116,8 @@ func getURLAttrValue(uuid string, t string) string {
 		"http://www.ft.com/ontology/content/DynamicContent": "content",
 		"http://www.ft.com/ontology/content/Graphic":        "content",
 		"http://www.ft.com/ontology/content/Audio":          "content",
+		"http://www.ft.com/ontology/content/Clip":           "content",
+		"http://www.ft.com/ontology/content/ClipSet":        "content",
 	}
 	return fmt.Sprintf("http://api.ft.com/%s/%s", typeSubURL[t], uuid)
 }
@@ -166,5 +156,21 @@ func scrollableTextExtraction(doc *etree.Document) {
 			insertIndex += len(children)
 		}
 		parent.RemoveChild(block)
+	}
+}
+
+// removeFTContentResources discards any ft-content that we don't want to send to clients.
+func removeFTContentResources(doc *etree.Document) {
+	toRemove := []string{
+		"http://www.ft.com/ontology/content/ImageSet",
+		"http://www.ft.com/ontology/content/MediaResource",
+		"http://www.ft.com/ontology/content/Video",
+		"http://www.ft.com/ontology/content/ClipSet",
+	}
+	for _, contentType := range toRemove {
+		for _, t := range doc.FindElements("//ft-content[@type='" + contentType + "']") {
+			p := t.Parent()
+			p.RemoveChild(t)
+		}
 	}
 }
